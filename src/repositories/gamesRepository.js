@@ -20,3 +20,9 @@ export async function insertGame(game) {
     [name, image, stockTotal, pricePerDay]
   );
 }
+
+export async function findGameById(id) {
+  const result = await connection.query(`SELECT * FROM games WHERE id = $1;`, [id]);
+  return result.rows[0];
+}
+

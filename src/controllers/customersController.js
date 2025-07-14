@@ -9,7 +9,18 @@ export async function getCustomers(req, res, next) {
   }
 }
 
-export async function postCustomer(req, res, next) {
+export async function getCustomerById(req, res, next) {
+  const { id } = req.params;
+
+  try {
+    const customer = await customersService.getCustomerById(Number(id));
+    res.status(200).send(customer);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function createCustomer(req, res, next) {
   try {
     await customersService.createCustomer(req.body);
     res.sendStatus(201);
@@ -18,17 +29,12 @@ export async function postCustomer(req, res, next) {
   }
 }
 
-export async function getCustomerById(req, res, next) {
+export async function updateCustomer(req, res, next) {
   const { id } = req.params;
 
   try {
-    const customer = await customersService.findCustomerById(id);
-
-    if (!customer) {
-      return res.status(404).send("Cliente não encontrado");
-    }
-
-    res.status(200).send(customer);
+    await customersService.updateCustomer(Number(id), req.body);
+    res.sendStatus(200);
   } catch (error) {
     next(error);
   }

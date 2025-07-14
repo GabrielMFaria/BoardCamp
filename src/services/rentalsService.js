@@ -1,11 +1,11 @@
+import dayjs from "dayjs";
 import * as rentalsRepository from "../repositories/rentalsRepository.js";
 import * as customersRepository from "../repositories/customersRepository.js";
 import * as gamesRepository from "../repositories/gamesRepository.js";
-import dayjs from "dayjs";
 
 export async function getAllRentals() {
-   const rows = await rentalsRepository.findAllRentals();
-   const rentals = rows.map(row => ({
+  const rows = await rentalsRepository.findAllRentals();
+  const rentals = rows.map(row => ({
     id: row.id,
     customerId: row.customerId,
     gameId: row.gameId,
@@ -16,11 +16,11 @@ export async function getAllRentals() {
     delayFee: row.delayFee,
     customer: {
       id: row.customerId,
-      name: row.customerName
+      name: row.customerName,
     },
     game: {
       id: row.gameId,
-      name: row.gameName
+      name: row.gameName,
     }
   }));
 
@@ -28,6 +28,11 @@ export async function getAllRentals() {
 }
 
 export async function createRental({ customerId, gameId, daysRented }) {
+  if (!daysRented || daysRented <= 0) {
+    const error = new Error("daysRented deve ser maior que zero");
+    error.type = "bad_request";
+    throw error;
+  }
 
   const customer = await customersRepository.findCustomerById(customerId);
   if (!customer) {
@@ -51,8 +56,7 @@ export async function createRental({ customerId, gameId, daysRented }) {
   }
 
   const originalPrice = daysRented * game.pricePerDay;
-
-  const rentDate = new Date();
+  const rentDate = dayjs().format("YYYY-MM-DD");
 
   await rentalsRepository.insertRental({
     customerId,
@@ -64,6 +68,7 @@ export async function createRental({ customerId, gameId, daysRented }) {
     delayFee: null
   });
 }
+
 export async function returnRental(id) {
   const rental = await rentalsRepository.findRentalById(id);
 
@@ -79,7 +84,7 @@ export async function returnRental(id) {
     throw error;
   }
 
-  const returnDate = dayjs(); // data atual
+  const returnDate = dayjs(); 
   const rentDate = dayjs(rental.rentDate);
   const daysPassed = returnDate.diff(rentDate, "day");
 
@@ -96,13 +101,13 @@ export async function deleteRental(id) {
 
   if (!rental) {
     const error = new Error("Aluguel não encontrado");
-    error.type = "not_found"; 
+    error.type = "not_found";
     throw error;
   }
 
   if (!rental.returnDate) {
     const error = new Error("Aluguel ainda não finalizado");
-    error.type = "unprocessable_entity"; 
+    error.type = "bad_request"; 
     throw error;
   }
 

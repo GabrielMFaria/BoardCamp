@@ -9,7 +9,7 @@ export async function getRentals(req, res, next) {
   }
 }
 
-export async function postRental(req, res, next) {
+export async function createRental(req, res, next) {
   try {
     await rentalsService.createRental(req.body);
     res.sendStatus(201);
@@ -20,8 +20,9 @@ export async function postRental(req, res, next) {
 
 export async function returnRental(req, res, next) {
   const { id } = req.params;
+
   try {
-    await rentalsService.returnRental(id);
+    await rentalsService.returnRental(Number(id));
     res.sendStatus(200);
   } catch (error) {
     next(error);
@@ -30,8 +31,9 @@ export async function returnRental(req, res, next) {
 
 export async function deleteRental(req, res, next) {
   const { id } = req.params;
+
   try {
-    await rentalsService.deleteRental(id);
+    await rentalsService.deleteRental(Number(id));
     res.sendStatus(200);
   } catch (error) {
     next(error);
